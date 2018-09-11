@@ -5,11 +5,27 @@ defmodule SimpleHttpd.Application do
 
   use Application
 
-  def start(_type, _args) do
+  def start(_type, [app: app]) do
+    # Applicationの環境からサーバオプションを取り出す
+    port = Application.get_env(app, :port, 80)
+    sslport = Application.get_env(app, :sslport, 443)
+    keyfile = Application.get_env(app, :keyfile) |> Path.expand(System.cwd())
+    certfile = Application.get_env(app, :certfile) |> Path.expand(System.cwd())
+
     # List all child processes to be supervised
     children = [
       # Starts a worker by calling: SimpleHttpd.Worker.start_link(arg)
       # {SimpleHttpd.Worker, arg},
+      Plug.Adapters.Cowboy2.child_spec(
+        scheme: :http,
+        plug: {SimpleHttpd.PlugTop, [app: app]},
+        options: [port: port]
+      ),
+      Plug.Adapters.Cowboy2.child_spec(
+        scheme: :https,
+        plug: {SimpleHttpd.PlugTop, [app: app]},
+        options: [port: sslport, keyfile: keyfile, certfile: certfile, otp_app: app]
+      )
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

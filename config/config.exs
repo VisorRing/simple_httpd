@@ -28,3 +28,11 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env()}.exs"
+
+config :simple_httpd, port: 8080
+config :simple_httpd, sslport: 8443
+config :simple_httpd, document_root: "/contents/directory"
+config :simple_httpd, keyfile: "host.key"
+config :simple_httpd, certfile: "host.crt"
+config :simple_httpd, directory_index: ["index.html", "index.htm"]
+config :simple_httpd, create_directory_index: true
